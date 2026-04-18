@@ -4,7 +4,7 @@ import { Button } from '../UI/Button';
 import { Home, Compass, PlusCircle, Trophy, Brain, Bell, User, LogOut } from 'lucide-react';
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -12,7 +12,8 @@ export default function Navbar() {
     navigate('/');
   };
 
-  if (!user) {
+  // Show landing page navbar for unauthenticated users
+  if (!isAuthenticated) {
     return (
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -27,6 +28,7 @@ export default function Navbar() {
     );
   }
 
+  // Show main navbar for authenticated users
   return (
     <nav className="bg-white shadow-sm border-b sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 py-3">
@@ -42,8 +44,11 @@ export default function Navbar() {
             <NavLink to="/leaderboard" icon={<Trophy size={18} />}>Leaderboard</NavLink>
             <NavLink to="/ai-center" icon={<Brain size={18} />}>AI Center</NavLink>
             <NavLink to="/notifications" icon={<Bell size={18} />}>Alerts</NavLink>
-            <NavLink to={`/profile/${user.id}`} icon={<User size={18} />}>Profile</NavLink>
-            <button onClick={handleLogout} className="flex items-center gap-1 px-3 py-2 text-gray-600 hover:text-red-600 rounded-lg transition">
+            <NavLink to={`/profile/${user?.id}`} icon={<User size={18} />}>Profile</NavLink>
+            <button 
+              onClick={handleLogout} 
+              className="flex items-center gap-1 px-3 py-2 text-gray-600 hover:text-red-600 rounded-lg transition"
+            >
               <LogOut size={18} /> Logout
             </button>
           </div>

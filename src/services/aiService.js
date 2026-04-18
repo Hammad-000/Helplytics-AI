@@ -45,7 +45,6 @@ export const aiService = {
   },
 
   async getInsights(userId) {
-    // Simulate AI insights
     return [
       '💡 You\'ve been very active this week! Keep up the great work.',
       '📈 Your trust score is above average — you\'re a trusted helper!',
@@ -73,3 +72,4 @@ export const aiService = {
     return suggestions;
   }
 };
+export default aiService

@@ -6,7 +6,11 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
   globalIgnores(['dist']),
+  
   {
+    resolve: {
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.json']  // Add .jsx here
+  },
     files: ['**/*.{js,jsx}'],
     extends: [
       js.configs.recommended,

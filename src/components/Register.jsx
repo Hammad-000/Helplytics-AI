@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import API from '../services/api';
 
+
 function Register({ onToggle }) {
   const [formData, setFormData] = useState({
     email: '',
