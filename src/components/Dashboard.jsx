@@ -105,156 +105,120 @@ export default function Dashboard() {
     return <Navigate to="/auth" replace />;
   }
 
-  return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Welcome back, {user?.name || user?.email || 'User'}!</h1>
-        <p className="text-gray-600">Here's what's happening with your help journey</p>
-      </div>
+return (
+  <div className="min-h-screen bg-[#F9F8F3] font-sans text-[#1A2624]">
+    <div className="max-w-7xl mx-auto px-6 py-10">
+      
+      {/* 1. THE HERO HEADER BLOCK - Matches "AI Center" mockup */}
+      <header className="mb-10 w-full rounded-[2.5rem] bg-[#1A2624] p-10 md:p-14 text-white shadow-xl relative overflow-hidden">
+        <div className="relative z-10">
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#0D9488]">
+            Dashboard / Welcome
+          </p>
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight">
+            Welcome back, <br/>
+            <span className="text-[#0D9488]">{user?.name || user?.email || 'User'}</span>.
+          </h1>
+          <p className="mt-6 text-lg opacity-60 max-w-xl">
+            Your community trust is at {stats.trustScore}%. Here is a summary of your impact and active requests needing attention.
+          </p>
+        </div>
+        {/* Subtle decorative circle */}
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#0D9488] opacity-10 blur-3xl"></div>
+      </header>
 
-      <div className="grid md:grid-cols-4 gap-6 mb-8">
-        <Card className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm opacity-90">Trust Score</div>
-              <div className="text-3xl font-bold">{stats.trustScore}</div>
-            </div>
-            <TrendingUp className="w-8 h-8 opacity-90" />
-          </div>
-        </Card>
-        
-        <Card>
-          <div className="flex items-center gap-3">
-            <CheckCircle className="text-green-500" />
-            <div>
-              <div className="text-sm text-gray-600">Requests Helped</div>
-              <div className="text-2xl font-bold">{stats.helped || 0}</div>
-            </div>
-          </div>
-        </Card>
-        
-        <Card>
-          <div className="flex items-center gap-3">
-            <Users className="text-blue-500" />
-            <div>
-              <div className="text-sm text-gray-600">Open Requests</div>
-              <div className="text-2xl font-bold">{stats.requests || recentRequests.length}</div>
-            </div>
-          </div>
-        </Card>
-        
-        <Card>
-          <div className="flex items-center gap-3">
-            <Clock className="text-yellow-500" />
-            <div>
-              <div className="text-sm text-gray-600">Response Rate</div>
-              <div className="text-2xl font-bold">92%</div>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-8">
-        <div>
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Brain className="text-purple-600" /> AI Insights
-          </h2>
-          <div className="space-y-3">
-            {aiInsights.length > 0 ? (
-              aiInsights.map((insight, i) => (
-                <Card key={i} className="border-l-4 border-purple-500">
-                  <p className="text-gray-700">{typeof insight === 'string' ? insight : insight.message || insight.text}</p>
-                </Card>
-              ))
-            ) : (
-              <Card className="text-gray-500 text-center py-8">
-                <Brain className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>No insights available yet</p>
-                <p className="text-sm">Start helping others to get AI insights!</p>
-              </Card>
-            )}
-          </div>
+      {/* 2. STATS GRID - Minimalist with large rounding */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="rounded-[2rem] bg-white p-8 shadow-sm border border-gray-100/50">
+          <TrendingUp className="w-6 h-6 text-[#0D9488] mb-4" />
+          <div className="text-sm font-bold text-gray-400 uppercase tracking-wider">Trust Score</div>
+          <div className="text-4xl font-black mt-1">{stats.trustScore}%</div>
         </div>
         
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Recent Requests</h2>
+        <div className="rounded-[2rem] bg-white p-8 shadow-sm border border-gray-100/50">
+          <CheckCircle className="w-6 h-6 text-teal-500 mb-4" />
+          <div className="text-sm font-bold text-gray-400 uppercase tracking-wider">Helped</div>
+          <div className="text-4xl font-black mt-1">{stats.helped || 0}</div>
+        </div>
+        
+        <div className="rounded-[2rem] bg-white p-8 shadow-sm border border-gray-100/50">
+          <Users className="w-6 h-6 text-blue-500 mb-4" />
+          <div className="text-sm font-bold text-gray-400 uppercase tracking-wider">Open Tasks</div>
+          <div className="text-4xl font-black mt-1">{stats.requests || recentRequests.length}</div>
+        </div>
+        
+        <div className="rounded-[2rem] bg-[#0D9488] p-8 shadow-lg text-white">
+          <Clock className="w-6 h-6 text-white/80 mb-4" />
+          <div className="text-sm font-bold text-white/60 uppercase tracking-wider">Response Rate</div>
+          <div className="text-4xl font-black mt-1">92%</div>
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-12 gap-10">
+        {/* 3. AI INSIGHTS - Matches "Smart Request Guidance" card */}
+        <section className="lg:col-span-5">
+          <div className="sticky top-8 rounded-[2.5rem] bg-white p-8 border border-gray-100 shadow-sm">
+            <h2 className="text-2xl font-black mb-6 flex items-center gap-3">
+              <Brain className="text-[#0D9488]" /> AI Intelligence
+            </h2>
+            <div className="space-y-4">
+              {aiInsights.map((insight, i) => (
+                <div key={i} className="group p-5 rounded-2xl bg-[#F4F7F6] border border-transparent hover:border-[#0D9488]/30 transition-all">
+                  <p className="text-[#1A2624] font-medium leading-relaxed">
+                    {typeof insight === 'string' ? insight : insight.message}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+        
+        {/* 4. RECENT REQUESTS - Matches the "Explore Feed" style */}
+        <section className="lg:col-span-7">
+          <h2 className="text-2xl font-black mb-6">Recent community activity</h2>
           <div className="space-y-4">
-            {recentRequests.length > 0 ? (
-              recentRequests.map((req, index) => (
-                <Link to={`/request/${req._id}`} key={req._id || index}>
-                  <Card className="hover:border-purple-300 transition-all hover:shadow-md cursor-pointer">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex gap-2 mb-2 flex-wrap">
-                          {req.category && (
-                            <Badge variant="purple">{req.category}</Badge>
-                          )}
-                          {req.urgency && (
-                            <Badge variant={getUrgencyColor(req.urgency)}>{req.urgency}</Badge>
-                          )}
-                          <Badge className={getStatusColor(req.status || req.state)}>
-                            {req.status || req.state || 'pending'}
-                          </Badge>
-                        </div>
-                        
-                        <h3 className="text-xl font-semibold mb-2">
-                          {req.title || req.name || 'Untitled Request'}
-                        </h3>
-                        
-                        <p className="text-gray-600 mb-3">
-                          {req.aiSummary || req.description?.substring(0, 150) || 'No description provided'}
-                          {(req.description?.length > 150 || req.aiSummary?.length > 150) && '...'}
-                        </p>
-                        
-                        {req.tags && req.tags.length > 0 && (
-                          <div className="flex gap-2 flex-wrap mb-2">
-                            {req.tags.slice(0, 3).map((tag, i) => (
-                              <Badge key={i} variant="outline">{tag}</Badge>
-                            ))}
-                            {req.tags.length > 3 && (
-                              <span className="text-xs text-gray-500">+{req.tags.length - 3} more</span>
-                            )}
-                          </div>
-                        )}
-                        
-                        <div className="mt-3 text-sm text-gray-500">
-                          Posted by {req.createdBy?.name || req.createdBy?.email || 'Anonymous'} 
-                          {req.createdBy?.trustScore && (
-                            <> • Trust Score: {req.createdBy.trustScore}</>
-                          )}
-                          {req.createdAt && (
-                            <> • {new Date(req.createdAt).toLocaleDateString()}</>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <Button size="sm" className="ml-4">
-                        View Details
-                      </Button>
+            {recentRequests.map((req, index) => (
+              <Link to={`/request/${req._id}`} key={req._id || index} className="block group">
+                <div className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm group-hover:shadow-md group-hover:border-[#0D9488]/20 transition-all">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex gap-2">
+                      <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-[#E8EFEE] text-[#0D9488]">
+                        {req.category || "General"}
+                      </span>
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-orange-50 text-orange-600`}>
+                        {req.urgency || "Normal"}
+                      </span>
                     </div>
-                  </Card>
-                </Link>
-              ))
-            ) : (
-              <Card className="text-gray-500 text-center py-8">
-                <Users className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>No requests yet</p>
-                <Link to="/create">
-                  <Button className="mt-3">Create Your First Request</Button>
-                </Link>
-              </Card>
-            )}
-          </div>
-          
-          {recentRequests.length > 0 && (
-            <div className="mt-4 text-center">
-              <Link to="/explore">
-                <Button variant="outline">View All Requests →</Button>
+                    <span className="text-xs font-bold text-gray-300">#{index + 1}</span>
+                  </div>
+                  
+                  <h3 className="text-2xl font-bold mb-3 group-hover:text-[#0D9488] transition-colors">
+                    {req.title || 'Untitled Request'}
+                  </h3>
+                  
+                  <p className="text-gray-500 leading-relaxed mb-6">
+                    {req.aiSummary || req.description?.substring(0, 120)}...
+                  </p>
+                  
+                  <div className="flex items-center justify-between pt-6 border-t border-gray-50">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-[#1A2624] flex items-center justify-center text-[10px] text-white font-bold">
+                        {req.createdBy?.name?.charAt(0) || 'A'}
+                      </div>
+                      <span className="text-sm font-bold text-[#1A2624] opacity-70">
+                        {req.createdBy?.name || 'Community Member'}
+                      </span>
+                    </div>
+                    <div className="text-[#0D9488] font-bold text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                      View details <span>→</span>
+                    </div>
+                  </div>
+                </div>
               </Link>
-            </div>
-          )}
-        </div>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
-  );
-}
+  </div>
+)}

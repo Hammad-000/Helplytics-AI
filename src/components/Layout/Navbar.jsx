@@ -1,65 +1,111 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Button } from '../UI/Button';
-import { Home, Compass, PlusCircle, Trophy, Brain, Bell, User, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
-  // Show landing page navbar for unauthenticated users
-  if (!isAuthenticated) {
-    return (
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Helplytics AI
-          </Link>
-          <div className="flex gap-3">
-            <Button onClick={() => navigate('/auth')}>Login / Signup</Button>
-          </div>
-        </div>
-      </nav>
-    );
-  }
+  // Shared Logo Component
+  const Logo = () => (
+    <Link to="/" className="flex items-center gap-3 group">
+      <div className="w-10 h-10 bg-[#0D9488] rounded-xl flex items-center justify-center shadow-sm group-hover:bg-[#1A2624] transition-colors">
+        <span className="text-white font-black text-xl">H</span>
+      </div>
+      <span className="text-[#1A2624] font-bold text-lg tracking-tight">
+        HelpHub AI
+      </span>
+    </Link>
+  );
 
-  // Show main navbar for authenticated users
   return (
-    <nav className="bg-white shadow-sm border-b sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6 py-3">
-        <div className="flex justify-between items-center">
-          <Link to="/dashboard" className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Helplytics
-          </Link>
-          
-          <div className="flex gap-1">
-            <NavLink to="/dashboard" icon={<Home size={18} />}>Dashboard</NavLink>
-            <NavLink to="/explore" icon={<Compass size={18} />}>Explore</NavLink>
-            <NavLink to="/create" icon={<PlusCircle size={18} />}>Create</NavLink>
-            <NavLink to="/leaderboard" icon={<Trophy size={18} />}>Leaderboard</NavLink>
-            <NavLink to="/ai-center" icon={<Brain size={18} />}>AI Center</NavLink>
-            <NavLink to="/notifications" icon={<Bell size={18} />}>Alerts</NavLink>
-            <NavLink to={`/profile/${user?.id}`} icon={<User size={18} />}>Profile</NavLink>
-            <button 
-              onClick={handleLogout} 
-              className="flex items-center gap-1 px-3 py-2 text-gray-600 hover:text-red-600 rounded-lg transition"
-            >
-              <LogOut size={18} /> Logout
-            </button>
-          </div>
+    <nav className="fixed top-0 left-0 right-0 z-50 px-8 py-4 bg-[#F4F1E8]/60 backdrop-blur-xl border-b border-[#1A2624]/5">
+      <div className="max-w-7xl mx-auto flex justify-between items-center">
+        
+        <Logo />
+
+        {/* Dynamic Navigation Links */}
+        <div className="flex items-center gap-2 md:gap-6">
+          {!isAuthenticated ? (
+            <>
+              <NavLink to="/" active={location.pathname === '/'}>Home</NavLink>
+              <NavLink to="/explore">Explore</NavLink>
+              <NavLink to="/leaderboard">Leaderboard</NavLink>
+              <NavLink to="/ai-center">AI Center</NavLink>
+              
+              <div className="hidden md:flex items-center gap-4 ml-4">
+                <span className="px-4 py-2 bg-white/80 rounded-full text-[10px] font-bold uppercase tracking-widest text-[#5C716E] border border-white">
+                  Live community signals
+                </span>
+                <button 
+                  onClick={() => navigate('/auth')}
+                  className="px-6 py-2.5 bg-[#0D9488] text-white rounded-full font-bold text-sm hover:bg-[#1A2624] transition-all shadow-lg shadow-teal-900/10"
+                >
+                  Join the platform
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <NavLink to="/dashboard" active={location.pathname === '/dashboard'}>Dashboard</NavLink>
+              <NavLink to="/explore" active={location.pathname === '/explore'}>Explore</NavLink>
+              <NavLink to="/create" active={location.pathname === '/create'} variant="pill">
+                Create Request
+              </NavLink>
+              <NavLink to="/leaderboard" active={location.pathname === '/leaderboard'}>Leaderboard</NavLink>
+              
+              <div className="h-6 w-px bg-[#1A2624]/10 mx-2" />
+              
+              <Link to={`/profile/${user?.id}`} className="group flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-[#DDE5E0] border border-white flex items-center justify-center text-[10px] font-black text-[#0D9488] group-hover:bg-[#0D9488] group-hover:text-white transition-all">
+                  {user?.name?.charAt(0) || 'U'}
+                </div>
+              </Link>
+
+              <button 
+                onClick={handleLogout}
+                className="p-2 text-[#5C716E] hover:text-red-500 transition-colors"
+              >
+                <LogOut size={18} />
+              </button>
+            </>
+          )}
         </div>
       </div>
     </nav>
   );
 }
 
-const NavLink = ({ to, children, icon }) => (
-  <Link to={to} className="flex items-center gap-1 px-3 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition">
-    {icon} {children}
-  </Link>
-);
+const NavLink = ({ to, children, active, variant }) => {
+  // Pill variant specifically for "Create Request" or "Home" active state
+  if (variant === 'pill' || active) {
+    return (
+      <Link 
+        to={to} 
+        className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${
+          active 
+            ? 'bg-[#CBDAD6] text-[#0D9488]' 
+            : 'bg-[#DDE5E0] text-[#5C716E] hover:bg-[#CBDAD6]'
+        }`}
+      >
+        {children}
+      </Link>
+    );
+  }
+
+  // Standard Link
+  return (
+    <Link 
+      to={to} 
+      className="px-2 py-1 text-sm font-semibold text-[#5C716E] hover:text-[#1A2624] transition-colors"
+    >
+      {children}
+    </Link>
+  );
+};
