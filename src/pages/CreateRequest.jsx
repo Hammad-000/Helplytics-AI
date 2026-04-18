@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
-import { aiService } from '../services/aiService';  // Named import
-import { Button, Card, Badge } from '../components/UI';
+import { useAuth } from '../context/AuthContext.jsx';
+import { api } from '../services/api.js';
+import { aiService } from '../services/aiService.js';
+import { Button, Card, Badge } from '../components/UI/index.js';
 import { Sparkles, RefreshCw } from 'lucide-react';
 
 export default function CreateRequest() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [form, setForm] = useState({ 
     title: '', 
     description: '', 
@@ -16,19 +18,23 @@ export default function CreateRequest() {
   });
   const [aiSuggestions, setAiSuggestions] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const handleAIAnalyze = async () => {
     if (!form.title && !form.description) {
-      alert('Please enter a title and description first');
+      setError('Please enter a title and description first');
       return;
     }
     
     setIsAnalyzing(true);
+    setError('');
     try {
       const suggestions = await aiService.analyzeRequest(form.title, form.description);
       setAiSuggestions(suggestions);
     } catch (error) {
       console.error('AI analysis failed:', error);
+      setError('AI analysis failed. Please try again.');
     } finally {
       setIsAnalyzing(false);
     }
@@ -47,12 +53,40 @@ export default function CreateRequest() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setError('');
+    
     try {
-      await api.post('/requests', form);
+      console.log('Submitting request:', form);
+      console.log('User ID:', user?.id);
+      
+      const response = await api.post('/requests', {
+        title: form.title,
+        description: form.description,
+        tags: form.tags,
+        category: form.category || 'General',
+        urgency: form.urgency
+      });
+      
+      console.log('Request created:', response.data);
       navigate('/explore');
     } catch (error) {
       console.error('Failed to create request:', error);
-      alert('Failed to create request. Please try again.');
+      console.error('Error response:', error.response);
+      console.error('Error message:', error.message);
+      
+      if (error.response) {
+        // Server responded with error
+        setError(error.response.data?.error || 'Failed to create request. Please try again.');
+      } else if (error.request) {
+        // Request was made but no response
+        setError('Cannot connect to server. Please check if backend is running.');
+      } else {
+        // Something else happened
+        setError('An error occurred. Please try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -61,10 +95,16 @@ export default function CreateRequest() {
       <h1 className="text-3xl font-bold mb-2">Create Help Request</h1>
       <p className="text-gray-600 mb-8">Get help from the community — AI will assist you</p>
 
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+          {error}
+        </div>
+      )}
+
       <Card className="p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium mb-2">Title</label>
+            <label className="block text-sm font-medium mb-2">Title *</label>
             <input 
               className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
               value={form.title} 
@@ -74,7 +114,7 @@ export default function CreateRequest() {
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-2">Description</label>
+            <label className="block text-sm font-medium mb-2">Description *</label>
             <textarea 
               rows="5" 
               className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
@@ -140,12 +180,14 @@ export default function CreateRequest() {
             <input 
               className="w-full border rounded-lg p-3" 
               value={form.tags.join(', ')} 
-              onChange={e => setForm({ ...form, tags: e.target.value.split(',').map(t => t.trim()) })} 
+              onChange={e => setForm({ ...form, tags: e.target.value.split(',').map(t => t.trim()).filter(t => t) })} 
               placeholder="react, javascript, help"
             />
           </div>
 
-          <Button type="submit" className="w-full">Post Request →</Button>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? 'Creating...' : 'Post Request →'}
+          </Button>
         </form>
       </Card>
     </div>
