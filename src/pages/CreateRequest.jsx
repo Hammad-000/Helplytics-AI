@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api } from '../services/api.js';
 import { aiService } from '../services/aiService.js';
-import { Button, Card, Badge } from '../components/UI/index.js';
-import { Sparkles, RefreshCw, Send, AlertCircle } from 'lucide-react';
+import { Sparkles, RefreshCw, Send, AlertCircle, Brain } from 'lucide-react';
 
 export default function CreateRequest() {
   const navigate = useNavigate();
@@ -22,18 +21,17 @@ export default function CreateRequest() {
   const [error, setError] = useState('');
 
   const handleAIAnalyze = async () => {
-    if (!form.title && !form.description) {
-      setError('Please enter a title and description first');
+    if (!form.title || !form.description) {
+      setError('Please provide a title and description for AI analysis.');
       return;
     }
-    
     setIsAnalyzing(true);
     setError('');
     try {
       const suggestions = await aiService.analyzeRequest(form.title, form.description);
       setAiSuggestions(suggestions);
     } catch (error) {
-      setError('AI analysis failed. Please try again.');
+      setError('AI analysis failed. Our systems are currently busy.');
     } finally {
       setIsAnalyzing(false);
     }
@@ -53,172 +51,157 @@ export default function CreateRequest() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError('');
-    
     try {
-      await api.post('/requests', {
-        ...form,
-        category: form.category || 'General'
-      });
+      await api.post('/requests', { ...form, category: form.category || 'General' });
       navigate('/explore');
     } catch (error) {
-      setError(error.response?.data?.error || 'Failed to create request.');
+      setError(error.response?.data?.error || 'Failed to publish request.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#F9F8F3] font-sans text-[#1A2624]">
-      <div className="max-w-4xl mx-auto px-6 py-16">
+    <div className="min-h-screen bg-[#F9F8F3] text-[#1A2624] pb-20">
+      <div className="max-w-6xl mx-auto px-6 pt-12">
         
-        {/* HEADER */}
-        <div className="mb-12">
-          <p className="text-[#0D9488] font-bold uppercase tracking-[0.2em] text-xs mb-3">Community Support</p>
-          <h1 className="text-5xl font-black tracking-tighter mb-4">Create Request</h1>
-          <p className="text-gray-500 text-lg">Describe what you need. Our AI will help categorize and tag it for the right experts.</p>
+        {/* HEADER SECTION */}
+        <div className="bg-[#1A2624] rounded-[2rem] p-12 mb-10 text-white relative overflow-hidden">
+          <p className="text-[#0D9488] font-bold uppercase tracking-widest text-xs mb-4">Create Request</p>
+          <h1 className="text-5xl font-black tracking-tighter mb-4 max-w-2xl leading-none">
+            Turn a rough problem into a clear help request.
+          </h1>
+          <p className="text-gray-400 text-lg max-w-xl">
+            Use built-in AI suggestions for category, urgency, tags, and a stronger description rewrite.
+          </p>
+          <Brain className="absolute right-[-20px] bottom-[-20px] w-64 h-64 text-white/5" />
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-100 text-red-600 px-6 py-4 rounded-3xl mb-8 flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
-            <AlertCircle size={20} />
+          <div className="bg-red-50 border border-red-100 text-red-600 px-6 py-4 rounded-2xl mb-8 flex items-center gap-3 animate-in slide-in-from-top-2">
+            <AlertCircle size={18} />
             <span className="font-bold text-sm">{error}</span>
           </div>
         )}
 
-        <div className="grid lg:grid-cols-1 gap-10">
-          <form onSubmit={handleSubmit} className="space-y-8">
-            
-            {/* MAIN INPUT CARD */}
-            <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-sm border border-gray-100">
-              <div className="space-y-8">
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-4 ml-1">Request Title</label>
+        <div className="grid lg:grid-cols-[1fr_380px] gap-8 items-start">
+          
+          {/* LEFT: MAIN FORM */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="bg-white rounded-[2rem] p-10 shadow-sm border border-gray-100 space-y-8">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Title</label>
+                <input 
+                  className="w-full bg-[#F4F7F6] border-none rounded-xl py-4 px-6 font-bold text-gray-700 placeholder:text-gray-300 focus:ring-2 focus:ring-[#0D9488]/20"
+                  placeholder="Need review on my JavaScript quiz app..."
+                  value={form.title} 
+                  onChange={e => setForm({ ...form, title: e.target.value })} 
+                  required 
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Description</label>
+                <textarea 
+                  rows="5" 
+                  className="w-full bg-[#F4F7F6] border-none rounded-xl py-4 px-6 text-gray-700 leading-relaxed focus:ring-2 focus:ring-[#0D9488]/20"
+                  placeholder="Explain the challenge, current progress, and what help would be useful."
+                  value={form.description} 
+                  onChange={e => setForm({ ...form, description: e.target.value })} 
+                  required 
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Tags</label>
                   <input 
-                    className="w-full bg-[#F4F7F6] border-none rounded-2xl py-5 px-6 text-xl font-bold placeholder:text-gray-300 focus:ring-2 focus:ring-[#0D9488]/20 transition-all"
-                    placeholder="What do you need help with?"
-                    value={form.title} 
-                    onChange={e => setForm({ ...form, title: e.target.value })} 
-                    required 
+                    className="w-full bg-[#F4F7F6] border-none rounded-xl py-4 px-6 font-bold text-sm" 
+                    value={form.tags.join(', ')} 
+                    onChange={e => setForm({ ...form, tags: e.target.value.split(',').map(t => t.trim()) })} 
+                    placeholder="React, Debugging..."
                   />
                 </div>
-
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-4 ml-1">Full Description</label>
-                  <textarea 
-                    rows="6" 
-                    className="w-full bg-[#F4F7F6] border-none rounded-2xl py-5 px-6 text-lg leading-relaxed placeholder:text-gray-300 focus:ring-2 focus:ring-[#0D9488]/20 transition-all"
-                    placeholder="Provide details, context, and any specific requirements..."
-                    value={form.description} 
-                    onChange={e => setForm({ ...form, description: e.target.value })} 
-                    required 
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Category</label>
+                  <input 
+                    className="w-full bg-[#F4F7F6] border-none rounded-xl py-4 px-6 font-bold text-sm"
+                    value={form.category} 
+                    onChange={e => setForm({ ...form, category: e.target.value })}
+                    placeholder="Web Development"
                   />
                 </div>
+              </div>
 
+              <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-gray-50">
                 <button 
                   type="button" 
                   onClick={handleAIAnalyze} 
                   disabled={isAnalyzing}
-                  className="flex items-center gap-3 px-6 py-3 rounded-full bg-[#1A2624] text-white font-bold text-sm hover:bg-[#0D9488] transition-all disabled:opacity-50 shadow-lg shadow-teal-900/10"
+                  className="flex items-center gap-3 px-6 py-3 rounded-full bg-white border border-gray-200 text-[#1A2624] font-bold text-xs hover:bg-gray-50 transition-all shadow-sm"
                 >
-                  <Sparkles size={18} className={isAnalyzing ? 'animate-spin' : ''} />
-                  {isAnalyzing ? 'AI is Thinking...' : 'Analyze with HelpHub AI'}
+                  <Sparkles size={16} className={`text-[#0D9488] ${isAnalyzing ? 'animate-spin' : ''}`} />
+                  {isAnalyzing ? 'Analyzing...' : 'Apply AI suggestions'}
+                </button>
+
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="px-10 py-3 bg-[#0D9488] hover:bg-[#12b3a4] text-white rounded-full font-black text-sm shadow-lg shadow-teal-900/10 flex items-center gap-3 transition-transform hover:scale-[1.02]"
+                >
+                  {isSubmitting ? 'Publishing...' : 'Publish request'}
                 </button>
               </div>
             </div>
-
-            {/* AI SUGGESTIONS PANEL - Only shows when available */}
-            {aiSuggestions && (
-              <div className="bg-[#1A2624] rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500">
-                <div className="relative z-10">
-                  <div className="flex justify-between items-center mb-8">
-                    <h3 className="text-2xl font-black flex items-center gap-3">
-                      <Sparkles className="text-[#0D9488]" /> AI Intelligence Result
-                    </h3>
-                    <button 
-                      type="button"
-                      onClick={applyAISuggestions}
-                      className="bg-[#0D9488] hover:bg-teal-500 text-white px-6 py-2 rounded-full font-bold text-xs transition-colors flex items-center gap-2"
-                    >
-                      <RefreshCw size={14} /> Apply All
-                    </button>
-                  </div>
-
-                  <div className="grid md:grid-cols-3 gap-8">
-                    <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-3">Predicted Category</p>
-                      <p className="text-xl font-bold text-[#0D9488]">{aiSuggestions.category}</p>
-                    </div>
-                    <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-3">Urgency Level</p>
-                      <p className="text-xl font-bold text-orange-400 capitalize">{aiSuggestions.urgency}</p>
-                    </div>
-                    <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-3">Generated Tags</p>
-                      <div className="flex flex-wrap gap-2">
-                        {aiSuggestions.tags.map(t => (
-                          <span key={t} className="text-xs font-bold px-2 py-1 bg-white/10 rounded-md">#{t}</span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                {/* Decorative glow */}
-                <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-[#0D9488] opacity-20 blur-[100px]"></div>
-              </div>
-            )}
-
-            {/* ADDITIONAL META DATA */}
-            <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-sm border border-gray-100">
-              <div className="grid md:grid-cols-2 gap-10">
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-4 ml-1">Manual Category</label>
-                  <input 
-                    className="w-full bg-[#F4F7F6] border-none rounded-2xl py-4 px-6 font-bold"
-                    value={form.category} 
-                    onChange={e => setForm({ ...form, category: e.target.value })} 
-                    placeholder="e.g., Development"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-4 ml-1">Select Urgency</label>
-                  <select 
-                    className="w-full bg-[#F4F7F6] border-none rounded-2xl py-4 px-6 font-bold appearance-none"
-                    value={form.urgency} 
-                    onChange={e => setForm({ ...form, urgency: e.target.value })}
-                  >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="critical">Critical</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="mt-10">
-                <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-4 ml-1">Keywords / Tags</label>
-                <input 
-                  className="w-full bg-[#F4F7F6] border-none rounded-2xl py-4 px-6 font-bold" 
-                  value={form.tags.join(', ')} 
-                  onChange={e => setForm({ ...form, tags: e.target.value.split(',').map(t => t.trim()).filter(t => t) })} 
-                  placeholder="react, tailwind, help..."
-                />
-              </div>
-            </div>
-
-            <button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="w-full bg-[#0D9488] hover:bg-teal-600 text-white py-6 rounded-full font-black text-xl shadow-xl shadow-teal-900/20 transition-all flex items-center justify-center gap-4 group"
-            >
-              {isSubmitting ? 'Publishing...' : (
-                <>
-                  Post Request <Send size={24} className="group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
-            </button>
-            
           </form>
+
+          {/* RIGHT: AI ASSISTANT PANEL */}
+          <aside className="sticky top-24 space-y-6">
+            <div className="bg-[#F4F1E8] border border-[#1A2624]/5 rounded-[2rem] p-8">
+              <p className="text-[#0D9488] font-bold uppercase tracking-widest text-[10px] mb-6 flex items-center gap-2">
+                <Sparkles size={14} /> AI Assistant
+              </p>
+              
+              <h3 className="text-3xl font-black tracking-tight mb-8 leading-none">Smart request guidance</h3>
+
+              {aiSuggestions ? (
+                <div className="space-y-6 animate-in fade-in duration-500">
+                  <div className="flex justify-between items-center border-b border-[#1A2624]/5 pb-4">
+                    <span className="text-gray-400 text-xs font-bold">Suggested category</span>
+                    <span className="font-black text-sm">{aiSuggestions.category}</span>
+                  </div>
+                  <div className="flex justify-between items-center border-b border-[#1A2624]/5 pb-4">
+                    <span className="text-gray-400 text-xs font-bold">Detected urgency</span>
+                    <span className="font-black text-sm text-orange-500 capitalize">{aiSuggestions.urgency}</span>
+                  </div>
+                  <div className="space-y-3">
+                    <span className="text-gray-400 text-xs font-bold">Suggested tags</span>
+                    <div className="flex flex-wrap gap-2">
+                      {aiSuggestions.tags.map(t => (
+                        <span key={t} className="bg-white px-3 py-1 rounded-full text-[10px] font-black border border-gray-100">#{t}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <button 
+                    onClick={applyAISuggestions}
+                    className="w-full mt-4 py-4 bg-[#1A2624] text-white rounded-2xl font-bold text-xs hover:bg-black transition-colors"
+                  >
+                    Sync suggestions with form
+                  </button>
+                </div>
+              ) : (
+                <div className="py-12 text-center space-y-4">
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100 shadow-sm">
+                    <Brain className="text-gray-300" size={32} />
+                  </div>
+                  <p className="text-gray-400 text-sm font-medium leading-relaxed">
+                    Write your title and description, then click "Apply AI suggestions" to see intelligence result.
+                  </p>
+                </div>
+              )}
+            </div>
+          </aside>
+
         </div>
       </div>
     </div>
